@@ -18,6 +18,7 @@ migrate_working_dir/
 *.iws
 .idea/
 .agents/
+.claude/
 .vscode/
 
 # Flutter/Dart/Pub related
