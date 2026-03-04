@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:list_of_rick_and_morty_characters/app/app.dart';
+
 void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'List of Rick and Morty characters',
-      home: Scaffold(),
-    );
-  }
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const App());
 }
