@@ -5,6 +5,11 @@ import '/core/navigation/navigation_shell.dart';
 import '/features/characters/presentation/pages/characters_page.dart';
 import '/features/favorites/presentation/pages/favorites_page.dart';
 
+/*
+  Используем StatefulShellRoute, чтобы каждая вкладка сохраняла свой стек страниц,
+  а GlobalKey — чтобы управлять навигацией внутри этих вкладок.
+*/
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _charactersNavigatorKey = GlobalKey<NavigatorState>();
 final _favoritesNavigatorKey = GlobalKey<NavigatorState>();
