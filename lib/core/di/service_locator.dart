@@ -7,13 +7,16 @@ import '/features/characters/data/datasources/character_local_datasource.dart';
 import '/features/characters/data/datasources/character_remote_datasource.dart';
 import '/features/characters/data/repositories/character_repository_impl.dart';
 import '/features/characters/domain/repositories/character_repository.dart';
+import '/features/favorites/data/models/favorite_character_entity.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initServiceLocator() async {
   // Database
   final dir = await getApplicationDocumentsDirectory();
-  final isar = await Isar.open([], directory: dir.path);
+  final isar = await Isar.open([
+    FavoriteCharacterEntitySchema,
+  ], directory: dir.path);
   sl.registerSingleton<Isar>(isar);
 
   // Network
