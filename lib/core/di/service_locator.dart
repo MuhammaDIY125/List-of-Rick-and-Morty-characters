@@ -1,4 +1,6 @@
 import 'package:get_it/get_it.dart';
+import 'package:isar_community/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '/core/network/dio_client.dart';
 import '/features/characters/data/datasources/character_local_datasource.dart';
@@ -9,6 +11,11 @@ import '/features/characters/domain/repositories/character_repository.dart';
 final sl = GetIt.instance;
 
 Future<void> initServiceLocator() async {
+  // Database
+  final dir = await getApplicationDocumentsDirectory();
+  final isar = await Isar.open([], directory: dir.path);
+  sl.registerSingleton<Isar>(isar);
+
   // Network
   sl.registerLazySingleton<DioClient>(() => DioClient());
 
