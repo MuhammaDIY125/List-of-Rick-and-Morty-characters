@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '/core/navigation/router.dart';
+import '/core/theme/app_theme.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -10,9 +11,7 @@ class App extends StatelessWidget {
     return MaterialApp.router(
       title: 'Rick & Morty',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-      ),
+      theme: AppTheme.light,
       routerConfig: router,
     );
   }
