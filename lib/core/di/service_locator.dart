@@ -11,6 +11,7 @@ import '/features/favorites/data/datasources/favorites_local_datasource.dart';
 import '/features/favorites/data/models/favorite_character_entity.dart';
 import '/features/favorites/data/repositories/favorites_repository_impl.dart';
 import '/features/favorites/domain/repositories/favorites_repository.dart';
+import '/features/characters/presentation/cubit/characters_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -44,4 +45,7 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton<FavoritesRepository>(
     () => FavoritesRepositoryImpl(localDataSource: sl()),
   );
+
+  // Cubits
+  sl.registerFactory(() => CharactersCubit(repository: sl()));
 }
