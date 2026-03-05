@@ -11,11 +11,11 @@ linter:
   rules:
     # Style
     prefer_single_quotes: true
-    always_use_package_imports: true
     prefer_const_constructors: true
     prefer_const_declarations: true
     prefer_final_locals: true
     prefer_final_fields: true
+    prefer_relative_imports: true
 
     # Safety
     avoid_print: true

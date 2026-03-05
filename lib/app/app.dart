@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:list_of_rick_and_morty_characters/core/navigation/router.dart';
+import '/core/navigation/router.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
