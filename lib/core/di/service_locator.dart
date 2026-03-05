@@ -7,7 +7,10 @@ import '/features/characters/data/datasources/character_local_datasource.dart';
 import '/features/characters/data/datasources/character_remote_datasource.dart';
 import '/features/characters/data/repositories/character_repository_impl.dart';
 import '/features/characters/domain/repositories/character_repository.dart';
+import '/features/favorites/data/datasources/favorites_local_datasource.dart';
 import '/features/favorites/data/models/favorite_character_entity.dart';
+import '/features/favorites/data/repositories/favorites_repository_impl.dart';
+import '/features/favorites/domain/repositories/favorites_repository.dart';
 
 final sl = GetIt.instance;
 
@@ -29,10 +32,16 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton<CharacterLocalDataSource>(
     () => CharacterLocalDataSourceImpl(),
   );
+  sl.registerLazySingleton<FavoritesLocalDataSource>(
+    () => FavoritesLocalDataSourceImpl(isar: sl()),
+  );
 
   // Repositories
   sl.registerLazySingleton<CharacterRepository>(
     () =>
         CharacterRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+  );
+  sl.registerLazySingleton<FavoritesRepository>(
+    () => FavoritesRepositoryImpl(localDataSource: sl()),
   );
 }
