@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../domain/models/character.dart';
 import '/features/favorites/presentation/cubit/favorites_cubit.dart';
@@ -40,6 +41,14 @@ class CharacterDetailsPage extends StatelessWidget {
                 child: Image.network(
                   character.image,
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(color: Colors.white),
+                    );
+                  },
                   errorBuilder: (ctx, err, stack) =>
                       const Icon(Icons.person, size: 100),
                 ),
