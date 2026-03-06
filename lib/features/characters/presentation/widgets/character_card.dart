@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../domain/models/character.dart';
+import '/features/favorites/presentation/cubit/favorites_cubit.dart';
+import '/features/favorites/presentation/widgets/animated_favorite_button.dart';
 
 class CharacterCard extends StatelessWidget {
   const CharacterCard({required this.character, super.key});
@@ -41,14 +45,34 @@ class CharacterCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        character.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              character.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          BlocBuilder<FavoritesCubit, FavoritesState>(
+                            builder: (context, state) {
+                              final isFavorite = state.isFavorite(character.id);
+                              return AnimatedFavoriteButton(
+                                isFavorite: isFavorite,
+                                onTap: () {
+                                  context.read<FavoritesCubit>().toggleFavorite(
+                                    character,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       _StatusRow(

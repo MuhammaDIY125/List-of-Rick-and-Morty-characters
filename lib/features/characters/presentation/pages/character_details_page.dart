@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/models/character.dart';
+import '/features/favorites/presentation/cubit/favorites_cubit.dart';
+import '/features/favorites/presentation/widgets/animated_favorite_button.dart';
 
 class CharacterDetailsPage extends StatelessWidget {
   const CharacterDetailsPage({required this.character, super.key});
@@ -10,7 +13,22 @@ class CharacterDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(character.name)),
+      appBar: AppBar(
+        title: Text(character.name),
+        actions: [
+          BlocBuilder<FavoritesCubit, FavoritesState>(
+            builder: (context, state) {
+              final isFavorite = state.isFavorite(character.id);
+              return AnimatedFavoriteButton(
+                isFavorite: isFavorite,
+                onTap: () {
+                  context.read<FavoritesCubit>().toggleFavorite(character);
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
