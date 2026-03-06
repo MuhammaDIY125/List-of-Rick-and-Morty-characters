@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../../domain/models/character.dart';
 
 class CharacterCard extends StatelessWidget {
-  final Character character;
+  const CharacterCard({required this.character, super.key});
 
-  const CharacterCard({super.key, required this.character});
+  final Character character;
 
   @override
   Widget build(BuildContext context) {
