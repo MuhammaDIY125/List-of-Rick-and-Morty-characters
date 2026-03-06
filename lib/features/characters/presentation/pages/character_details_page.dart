@@ -20,6 +20,7 @@ class CharacterDetailsPage extends StatelessWidget {
             builder: (context, state) {
               final isFavorite = state.isFavorite(character.id);
               return AnimatedFavoriteButton(
+                showBackground: false,
                 isFavorite: isFavorite,
                 onTap: () {
                   context.read<FavoritesCubit>().toggleFavorite(character);
