@@ -56,8 +56,14 @@ class FavoritesScreen extends StatelessWidget {
             return const Center(child: Text('No favorites yet'));
           }
 
-          return ListView.builder(
+          return GridView.builder(
             padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 180,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
             itemCount: state.favorites.length,
             itemBuilder: (context, index) {
               return CharacterCard(character: state.favorites[index]);

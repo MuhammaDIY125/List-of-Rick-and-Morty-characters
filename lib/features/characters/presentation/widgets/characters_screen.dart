@@ -71,9 +71,15 @@ class _CharactersScreenState extends State<CharactersScreen> {
             return const Center(child: Text('Characters not found'));
           }
 
-          return ListView.builder(
-            controller: _scrollController,
+          return GridView.builder(
             padding: const EdgeInsets.all(16),
+            controller: _scrollController,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 180,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
             itemCount: state.hasReachedMax
                 ? state.characters.length
                 : state.characters.length + 1,
