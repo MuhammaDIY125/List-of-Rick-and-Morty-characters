@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '/core/theme/theme_switcher_button.dart';
 import '../cubit/characters_cubit.dart';
 import 'character_card.dart';
 import 'retry_error_widget.dart';
@@ -45,7 +46,11 @@ class _CharactersScreenState extends State<CharactersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rick and Morty'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Rick and Morty'),
+        centerTitle: true,
+        actions: const [ThemeSwitcherButton()],
+      ),
       body: BlocBuilder<CharactersCubit, CharactersState>(
         builder: (context, state) {
           if (state.status == CharactersStatus.initial ||

@@ -13,6 +13,7 @@ import '/features/favorites/data/repositories/favorites_repository_impl.dart';
 import '/features/favorites/domain/repositories/favorites_repository.dart';
 import '/features/favorites/presentation/cubit/favorites_cubit.dart';
 import '/features/characters/presentation/cubit/characters_cubit.dart';
+import '/core/theme/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -50,4 +51,5 @@ Future<void> initServiceLocator() async {
   // Cubits
   sl.registerFactory(() => CharactersCubit(repository: sl()));
   sl.registerFactory(() => FavoritesCubit(repository: sl()));
+  sl.registerLazySingleton(() => ThemeCubit());
 }
