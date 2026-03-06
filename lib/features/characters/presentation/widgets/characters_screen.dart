@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/characters_cubit.dart';
 import 'character_card.dart';
+import 'retry_error_widget.dart';
 
 class CharactersScreen extends StatefulWidget {
   const CharactersScreen({super.key});
@@ -54,20 +55,9 @@ class _CharactersScreenState extends State<CharactersScreen> {
 
           if (state.status == CharactersStatus.error &&
               state.characters.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: ${state.errorMessage}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<CharactersCubit>().retry(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            return RetryErrorWidget(
+              errorMessage: state.errorMessage,
+              onRetry: () => context.read<CharactersCubit>().retry(),
             );
           }
 
