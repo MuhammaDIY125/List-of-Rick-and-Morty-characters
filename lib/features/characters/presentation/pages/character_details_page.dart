@@ -16,11 +16,14 @@ class CharacterDetailsPage extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 1,
-              child: Image.network(
-                character.image,
-                fit: BoxFit.cover,
-                errorBuilder: (ctx, err, stack) =>
-                    const Icon(Icons.person, size: 100),
+              child: Hero(
+                tag: 'character_${character.id}',
+                child: Image.network(
+                  character.image,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.person, size: 100),
+                ),
               ),
             ),
             Padding(
