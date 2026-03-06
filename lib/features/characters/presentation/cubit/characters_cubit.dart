@@ -15,12 +15,9 @@ class CharactersCubit extends Cubit<CharactersState> {
   Future<void> fetchCharacters() async {
     if (state.hasReachedMax || state.status == CharactersStatus.loading) return;
 
-    final isInitial = state.status == CharactersStatus.initial;
     final isPageOne = state.currentPage == 1;
 
-    if (isInitial || (isPageOne && state.characters.isEmpty)) {
-      emit(state.copyWith(status: CharactersStatus.loading));
-    }
+    emit(state.copyWith(status: CharactersStatus.loading));
 
     try {
       final characters = await _repository.getCharacters(state.currentPage);
@@ -32,9 +29,17 @@ class CharactersCubit extends Cubit<CharactersState> {
         return;
       }
 
-      final updatedCharacters = isPageOne
-          ? characters
-          : [...state.characters, ...characters];
+      final List<Character> updatedCharacters;
+      if (isPageOne) {
+        updatedCharacters = characters;
+      } else {
+        // Дедупликация по ID для защиты от повторов
+        final characterIds = state.characters.map((c) => c.id).toSet();
+        final newCharacters = characters
+            .where((c) => !characterIds.contains(c.id))
+            .toList();
+        updatedCharacters = [...state.characters, ...newCharacters];
+      }
 
       emit(
         state.copyWith(
@@ -54,6 +59,9 @@ class CharactersCubit extends Cubit<CharactersState> {
             errorMessage: e.toString(),
           ),
         );
+      } else {
+        // Сбрасываем статус в loaded, чтобы можно было попробовать еще раз при скролле
+        emit(state.copyWith(status: CharactersStatus.loaded));
       }
     }
   }
