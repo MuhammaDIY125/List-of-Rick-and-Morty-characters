@@ -14,7 +14,10 @@ class CharacterCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => context.push('/character/${character.id}'),
+        onTap: () => context.push(
+          '/characters/character/${character.id}',
+          extra: character,
+        ),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
