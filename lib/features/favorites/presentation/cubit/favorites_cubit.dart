@@ -17,8 +17,14 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     emit(state.copyWith(status: FavoritesStatus.loading));
     try {
       final favorites = await _repository.getFavorites();
+
+      final sortedFavorites = _sortFavoritesList(favorites, state.sortOrder);
+
       emit(
-        state.copyWith(status: FavoritesStatus.loaded, favorites: favorites),
+        state.copyWith(
+          status: FavoritesStatus.loaded,
+          favorites: sortedFavorites,
+        ),
       );
     } catch (e) {
       emit(
@@ -28,6 +34,28 @@ class FavoritesCubit extends Cubit<FavoritesState> {
         ),
       );
     }
+  }
+
+  void sortFavorites(FavoritesSortOrder order) {
+    if (state.status != FavoritesStatus.loaded) return;
+
+    final sortedFavorites = _sortFavoritesList(state.favorites, order);
+    emit(state.copyWith(sortOrder: order, favorites: sortedFavorites));
+  }
+
+  List<Character> _sortFavoritesList(
+    List<Character> list,
+    FavoritesSortOrder order,
+  ) {
+    if (order == FavoritesSortOrder.none || list.isEmpty) return list;
+
+    final newList = List<Character>.from(list);
+    if (order == FavoritesSortOrder.nameAsc) {
+      newList.sort((a, b) => a.name.compareTo(b.name));
+    } else {
+      newList.sort((a, b) => b.name.compareTo(a.name));
+    }
+    return newList;
   }
 
   Future<void> toggleFavorite(Character character) async {

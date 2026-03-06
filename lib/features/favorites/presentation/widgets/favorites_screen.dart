@@ -10,7 +10,37 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Favorites'),
+        centerTitle: true,
+        actions: [
+          BlocBuilder<FavoritesCubit, FavoritesState>(
+            builder: (context, state) {
+              return PopupMenuButton<FavoritesSortOrder>(
+                onSelected: (order) {
+                  context.read<FavoritesCubit>().sortFavorites(order);
+                },
+                initialValue: state.sortOrder,
+                icon: const Icon(Icons.sort),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: FavoritesSortOrder.none,
+                    child: Text('Default'),
+                  ),
+                  const PopupMenuItem(
+                    value: FavoritesSortOrder.nameAsc,
+                    child: Text('Name (A-Z)'),
+                  ),
+                  const PopupMenuItem(
+                    value: FavoritesSortOrder.nameDesc,
+                    child: Text('Name (Z-A)'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<FavoritesCubit, FavoritesState>(
         builder: (context, state) {
           if (state.status == FavoritesStatus.loading &&
