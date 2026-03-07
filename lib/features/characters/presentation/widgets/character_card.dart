@@ -32,10 +32,8 @@ class CharacterCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Hero(
-                    tag: 'character_${character.id}',
-                    child: RetriableNetworkImage(
-                      imageUrl: character.image,
-                    ),
+                    tag: 'character_${character.id}_image',
+                    child: RetriableNetworkImage(imageUrl: character.image),
                   ),
                   // Кнопка избранного в правом верхнем углу
                   Positioned(
@@ -44,13 +42,16 @@ class CharacterCard extends StatelessWidget {
                     child: BlocBuilder<FavoritesCubit, FavoritesState>(
                       builder: (context, state) {
                         final isFavorite = state.isFavorite(character.id);
-                        return AnimatedFavoriteButton(
-                          isFavorite: isFavorite,
-                          onTap: () {
-                            context.read<FavoritesCubit>().toggleFavorite(
-                              character,
-                            );
-                          },
+                        return Hero(
+                          tag: 'character_${character.id}_favorite',
+                          child: AnimatedFavoriteButton(
+                            isFavorite: isFavorite,
+                            onTap: () {
+                              context.read<FavoritesCubit>().toggleFavorite(
+                                character,
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
@@ -61,15 +62,18 @@ class CharacterCard extends StatelessWidget {
             // Имя персонажа
             Padding(
               padding: const EdgeInsets.all(8),
-              child: Text(
-                character.name,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              child: Hero(
+                tag: 'character_${character.id}_name',
+                child: Text(
+                  character.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
               ),
             ),
           ],

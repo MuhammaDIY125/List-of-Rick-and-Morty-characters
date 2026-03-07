@@ -50,10 +50,8 @@ class CharacterDetailsPage extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Hero(
-                      tag: 'character_${character.id}',
-                      child: RetriableNetworkImage(
-                        imageUrl: character.image,
-                      ),
+                      tag: 'character_${character.id}_image',
+                      child: RetriableNetworkImage(imageUrl: character.image),
                     ),
                     // Затемнение только снизу для читаемости текста
                     const DecoratedBox(
@@ -141,13 +139,16 @@ class _HeaderTitleOverlay extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            character.name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
+          Hero(
+            tag: 'character_${character.id}_name',
+            child: Text(
+              character.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
           const SizedBox(height: 4),
@@ -215,7 +216,9 @@ class _InfoSection extends StatelessWidget {
                       height: 1,
                       indent: 54,
                       endIndent: 16,
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.3,
+                      ),
                     ),
                 ],
               );
@@ -249,7 +252,9 @@ class _InfoRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 20, color: theme.colorScheme.primary),
@@ -262,7 +267,9 @@ class _InfoRow extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.7,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -322,11 +329,15 @@ class _FavoriteAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<FavoritesCubit, FavoritesState>(
       builder: (context, state) {
-        return _AppBarCircleButton(
-          icon: state.isFavorite(character.id)
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-          onTap: () => context.read<FavoritesCubit>().toggleFavorite(character),
+        return Hero(
+          tag: 'character_${character.id}_favorite',
+          child: _AppBarCircleButton(
+            icon: state.isFavorite(character.id)
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            onTap: () =>
+                context.read<FavoritesCubit>().toggleFavorite(character),
+          ),
         );
       },
     );
