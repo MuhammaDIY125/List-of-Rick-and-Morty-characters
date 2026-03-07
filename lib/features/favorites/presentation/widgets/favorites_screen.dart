@@ -9,67 +9,109 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favorites'),
-        centerTitle: true,
-        actions: [
-          BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, state) {
-              return PopupMenuButton<FavoritesSortOrder>(
-                onSelected: (order) {
-                  context.read<FavoritesCubit>().sortFavorites(order);
-                },
-                initialValue: state.sortOrder,
-                icon: const Icon(Icons.sort),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: FavoritesSortOrder.none,
-                    child: Text('Default'),
-                  ),
-                  const PopupMenuItem(
-                    value: FavoritesSortOrder.nameAsc,
-                    child: Text('Name (A-Z)'),
-                  ),
-                  const PopupMenuItem(
-                    value: FavoritesSortOrder.nameDesc,
-                    child: Text('Name (Z-A)'),
-                  ),
-                ],
-              );
-            },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [colorScheme.surface, colorScheme.surfaceContainerLowest],
           ),
-        ],
-      ),
-      body: BlocBuilder<FavoritesCubit, FavoritesState>(
-        builder: (context, state) {
-          if (state.status == FavoritesStatus.loading &&
-              state.favorites.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        ),
+        child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, state) {
+            if (state.status == FavoritesStatus.loading &&
+                state.favorites.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state.status == FavoritesStatus.error) {
-            return Center(child: Text('Error: ${state.errorMessage}'));
-          }
+            if (state.status == FavoritesStatus.error) {
+              return Center(child: Text('Error: ${state.errorMessage}'));
+            }
 
-          if (state.favorites.isEmpty) {
-            return const Center(child: Text('No favorites yet'));
-          }
+            if (state.favorites.isEmpty) {
+              return Center(
+                child: Text(
+                  'No favorites yet',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 180,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemCount: state.favorites.length,
-            itemBuilder: (context, index) {
-              return CharacterCard(character: state.favorites[index]);
-            },
-          );
-        },
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  elevation: 0,
+                  backgroundColor: colorScheme.surface,
+                  surfaceTintColor: Colors.transparent,
+                  title: Text(
+                    'Favorites',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  centerTitle: true,
+                  actions: [
+                    BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, state) {
+                        return PopupMenuButton<FavoritesSortOrder>(
+                          onSelected: (order) {
+                            context.read<FavoritesCubit>().sortFavorites(order);
+                          },
+                          initialValue: state.sortOrder,
+                          icon: Icon(
+                            Icons.tune_rounded,
+                            color: colorScheme.primary,
+                          ),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: FavoritesSortOrder.none,
+                              child: Text('Default'),
+                            ),
+                            const PopupMenuItem(
+                              value: FavoritesSortOrder.nameAsc,
+                              child: Text('Name (A-Z)'),
+                            ),
+                            const PopupMenuItem(
+                              value: FavoritesSortOrder.nameDesc,
+                              child: Text('Name (Z-A)'),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  sliver: SliverGrid.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
+                    itemCount: state.favorites.length,
+                    itemBuilder: (context, index) {
+                      return CharacterCard(character: state.favorites[index]);
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -54,57 +54,89 @@ class _CharactersScreenState extends State<CharactersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rick and Morty'),
-        centerTitle: true,
-        actions: const [ThemeSwitcherButton()],
-      ),
-      body: BlocBuilder<CharactersCubit, CharactersState>(
-        builder: (context, state) {
-          if (state.status == CharactersStatus.initial ||
-              (state.status == CharactersStatus.loading &&
-                  state.characters.isEmpty)) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [colorScheme.surface, colorScheme.surfaceContainerLowest],
+          ),
+        ),
+        child: BlocBuilder<CharactersCubit, CharactersState>(
+          builder: (context, state) {
+            if (state.status == CharactersStatus.initial ||
+                (state.status == CharactersStatus.loading &&
+                    state.characters.isEmpty)) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state.status == CharactersStatus.error &&
-              state.characters.isEmpty) {
-            return RetryErrorWidget(
-              errorMessage: state.errorMessage,
-              onRetry: () => context.read<CharactersCubit>().retry(),
-            );
-          }
+            if (state.status == CharactersStatus.error &&
+                state.characters.isEmpty) {
+              return RetryErrorWidget(
+                errorMessage: state.errorMessage,
+                onRetry: () => context.read<CharactersCubit>().retry(),
+              );
+            }
 
-          if (state.characters.isEmpty) {
-            return const Center(child: Text('Characters not found'));
-          }
+            if (state.characters.isEmpty) {
+              return const Center(child: Text('No characters found'));
+            }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            controller: _scrollController,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 180,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemCount: state.hasReachedMax
-                ? state.characters.length
-                : state.characters.length + 1,
-            itemBuilder: (context, index) {
-              if (index >= state.characters.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(),
+            return CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  elevation: 0,
+                  backgroundColor: colorScheme.surface,
+                  surfaceTintColor: Colors.transparent,
+                  title: Text(
+                    'Rick and Morty',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                );
-              }
-              return CharacterCard(character: state.characters[index]);
-            },
-          );
-        },
+                  centerTitle: true,
+                  actions: const [ThemeSwitcherButton()],
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  sliver: SliverGrid.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
+                    itemCount: state.hasReachedMax
+                        ? state.characters.length
+                        : state.characters.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index >= state.characters.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      return CharacterCard(character: state.characters[index]);
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
