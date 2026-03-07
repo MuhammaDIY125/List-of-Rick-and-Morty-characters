@@ -1,10 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/models/character.dart';
 import '/core/widgets/retriable_network_image.dart';
 import '/features/favorites/presentation/cubit/favorites_cubit.dart';
-import '/features/favorites/presentation/widgets/animated_favorite_button.dart';
 
 class CharacterDetailsPage extends StatelessWidget {
   const CharacterDetailsPage({required this.character, super.key});
@@ -13,68 +14,110 @@ class CharacterDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(character.name),
-        actions: [
-          BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, state) {
-              final isFavorite = state.isFavorite(character.id);
-              return AnimatedFavoriteButton(
-                showBackground: false,
-                isFavorite: isFavorite,
-                onTap: () {
-                  context.read<FavoritesCubit>().toggleFavorite(character);
-                },
-              );
-            },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [colorScheme.surface, colorScheme.surfaceContainerLowest],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Hero(
-                tag: 'character_${character.id}',
-                child: RetriableNetworkImage(
-                  imageUrl: character.image,
+        ),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 420,
+              pinned: true,
+              stretch: true,
+              elevation: 0,
+              backgroundColor: colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
+              // Кнопка назад в стиле iOS
+              leading: _AppBarCircleButton(
+                icon: Icons.arrow_back_ios_new_rounded,
+                onTap: () => Navigator.pop(context),
+              ),
+              actions: [
+                _FavoriteAction(character: character),
+                const SizedBox(width: 12),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: 'character_${character.id}',
+                      child: RetriableNetworkImage(
+                        imageUrl: character.image,
+                      ),
+                    ),
+                    // Затемнение только снизу для читаемости текста
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.6, 1.0],
+                          colors: [Colors.transparent, Colors.black87],
+                        ),
+                      ),
+                    ),
+                    _HeaderTitleOverlay(character: character),
+                  ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _InfoRow(title: 'Status', value: character.status),
-                      const Divider(),
-                      _InfoRow(title: 'Species', value: character.species),
-                      const Divider(),
-                      _InfoRow(title: 'Gender', value: character.gender),
-                      const Divider(),
-                      _InfoRow(title: 'Origin', value: character.originName),
-                      const Divider(),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _InfoSection(
+                    title: 'CHARACTER INFO',
+                    items: [
                       _InfoRow(
-                        title: 'Location',
-                        value: character.locationName,
+                        icon: Icons.fingerprint_rounded,
+                        label: 'Species',
+                        value: character.species,
                       ),
-                      const Divider(),
                       _InfoRow(
-                        title: 'Episodes',
-                        value: character.episodeCount.toString(),
+                        icon: Icons.face_unlock_outlined,
+                        label: 'Gender',
+                        value: character.gender,
+                      ),
+                      _InfoRow(
+                        icon: Icons.info_outline_rounded,
+                        label: 'Status',
+                        value: character.status,
+                        valueColor: _statusColor(character.status),
+                      ),
+                      _InfoRow(
+                        icon: Icons.layers_outlined,
+                        label: 'Appearances',
+                        value: '${character.episodeCount} episodes',
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  _InfoSection(
+                    title: 'GEOGRAPHY',
+                    items: [
+                      _InfoRow(
+                        icon: Icons.public_rounded,
+                        label: 'Origin',
+                        value: character.originName,
+                      ),
+                      _InfoRow(
+                        icon: Icons.location_on_rounded,
+                        label: 'Last Location',
+                        value: character.locationName,
+                      ),
+                    ],
+                  ),
+                ]),
               ),
             ),
           ],
@@ -84,32 +127,219 @@ class CharacterDetailsPage extends StatelessWidget {
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.title, required this.value});
-
-  final String title;
-  final String value;
+class _HeaderTitleOverlay extends StatelessWidget {
+  final Character character;
+  const _HeaderTitleOverlay({required this.character});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
+    return Positioned(
+      bottom: 24,
+      left: 20,
+      right: 20,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
+          Text(
+            character.name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
             ),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
+          const SizedBox(height: 4),
+          Text(
+            'ID: #${character.id.toString().padLeft(3, '0')}',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1.2,
+            ),
+          ),
         ],
       ),
     );
+  }
+}
+
+class _InfoSection extends StatelessWidget {
+  final String title;
+  final List<Widget> items;
+
+  const _InfoSection({required this.title, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
+            title,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            children: items.asMap().entries.map((entry) {
+              final isLast = entry.key == items.length - 1;
+              return Column(
+                children: [
+                  entry.value,
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      indent: 54,
+                      endIndent: 16,
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label, value;
+  final Color? valueColor;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: valueColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppBarCircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _AppBarCircleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(100),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(icon, color: Colors.white, size: 18),
+              onPressed: onTap,
+              padding: EdgeInsets.zero,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteAction extends StatelessWidget {
+  final Character character;
+  const _FavoriteAction({required this.character});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<FavoritesCubit, FavoritesState>(
+      builder: (context, state) {
+        return _AppBarCircleButton(
+          icon: state.isFavorite(character.id)
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
+          onTap: () => context.read<FavoritesCubit>().toggleFavorite(character),
+        );
+      },
+    );
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'alive':
+      return const Color(0xFF2ECC71);
+    case 'dead':
+      return const Color(0xFFE74C3C);
+    default:
+      return const Color(0xFF95A5A6);
   }
 }
