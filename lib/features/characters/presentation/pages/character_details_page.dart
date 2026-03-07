@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../domain/models/character.dart';
+import '/core/widgets/retriable_network_image.dart';
 import '/features/favorites/presentation/cubit/favorites_cubit.dart';
 import '/features/favorites/presentation/widgets/animated_favorite_button.dart';
 
@@ -38,39 +38,8 @@ class CharacterDetailsPage extends StatelessWidget {
               aspectRatio: 1,
               child: Hero(
                 tag: 'character_${character.id}',
-                child: Image.network(
-                  character.image,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(color: Colors.white),
-                    );
-                  },
-                  errorBuilder: (ctx, err, stack) => Container(
-                    color: Colors.grey[300],
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.broken_image,
-                          size: 100,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Failed to load image',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+                child: RetriableNetworkImage(
+                  imageUrl: character.image,
                 ),
               ),
             ),
