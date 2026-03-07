@@ -51,9 +51,6 @@ class CharactersCubit extends Cubit<CharactersState> {
           currentPage: state.currentPage + 1,
         ),
       );
-
-      // Фоновое обновление из сети для реализации offline-first
-      _backgroundRefresh(state.currentPage - 1);
     } on ConnectionException {
       _handleError('No internet connection', isPageOne);
     } on TimeoutException {
@@ -86,27 +83,6 @@ class CharactersCubit extends Cubit<CharactersState> {
     } else {
       // Если это не первая страница, просто возвращаемся в loaded для повторной попытки
       emit(state.copyWith(status: CharactersStatus.loaded));
-    }
-  }
-
-  Future<void> _backgroundRefresh(int page) async {
-    try {
-      await _repository.getCharacters(page, forceRefresh: true);
-      developer.log(
-        'Background refresh completed for page $page',
-        name: 'CharactersCubit',
-      );
-    } on NetworkException catch (e) {
-      developer.log(
-        'Background refresh failed: ${e.message}',
-        name: 'CharactersCubit',
-      );
-    } catch (e) {
-      developer.log(
-        'Background refresh error',
-        error: e,
-        name: 'CharactersCubit',
-      );
     }
   }
 
