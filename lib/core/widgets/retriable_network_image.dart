@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 class RetriableNetworkImage extends StatefulWidget {
   const RetriableNetworkImage({
@@ -29,11 +28,11 @@ class _RetriableNetworkImageState extends State<RetriableNetworkImage> {
       fit: widget.fit,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return _buildShimmer();
+        return Container(color: Colors.white);
       },
       errorBuilder: (context, error, stackTrace) {
         _scheduleRetry();
-        return _buildShimmer();
+        return Container(color: Colors.white);
       },
     );
   }
@@ -56,14 +55,5 @@ class _RetriableNetworkImageState extends State<RetriableNetworkImage> {
         _isRetryScheduled = false;
       });
     });
-  }
-
-  Widget _buildShimmer() {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFD8D8D8),
-      highlightColor: const Color(0xFFE2E2E2),
-      period: const Duration(milliseconds: 1600),
-      child: Container(color: const Color(0xFFD8D8D8)),
-    );
   }
 }

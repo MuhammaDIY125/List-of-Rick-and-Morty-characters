@@ -18,66 +18,68 @@ class CharacterCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => context.push(
-          '/characters/character/${character.id}',
-          extra: character,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Изображение с кнопкой избранного
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: 'character_${character.id}_image',
-                    child: RetriableNetworkImage(imageUrl: character.image),
-                  ),
-                  // Кнопка избранного в правом верхнем углу
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
-                      builder: (context, state) {
-                        final isFavorite = state.isFavorite(character.id);
-                        return Hero(
-                          tag: 'character_${character.id}_favorite',
-                          child: AnimatedFavoriteButton(
-                            isFavorite: isFavorite,
-                            onTap: () {
-                              context.read<FavoritesCubit>().toggleFavorite(
-                                character,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Hero(
+                  tag: 'character_${character.id}_image',
+                  child: RetriableNetworkImage(imageUrl: character.image),
+                ),
               ),
-            ),
-            // Имя персонажа
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Hero(
-                tag: 'character_${character.id}_name',
-                child: Text(
-                  character.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Hero(
+                  tag: 'character_${character.id}_name',
+                  child: Text(
+                    character.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                splashColor: const Color.fromRGBO(0, 0, 0, 0.18),
+                highlightColor: const Color.fromRGBO(0, 0, 0, 0.1),
+                onTap: () => context.push(
+                  '/characters/character/${character.id}',
+                  extra: character,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: BlocBuilder<FavoritesCubit, FavoritesState>(
+              builder: (context, state) {
+                final isFavorite = state.isFavorite(character.id);
+                return Hero(
+                  tag: 'character_${character.id}_favorite',
+                  child: AnimatedFavoriteButton(
+                    isFavorite: isFavorite,
+                    onTap: () {
+                      context.read<FavoritesCubit>().toggleFavorite(character);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
