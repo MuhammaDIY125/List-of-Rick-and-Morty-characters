@@ -15,6 +15,8 @@ class CharactersScreen extends StatefulWidget {
 
 class _CharactersScreenState extends State<CharactersScreen> {
   final ScrollController _scrollController = ScrollController();
+  DateTime? _lastFetchTime;
+  static const Duration _fetchThrottle = Duration(milliseconds: 500);
 
   @override
   void initState() {
@@ -31,9 +33,16 @@ class _CharactersScreenState extends State<CharactersScreen> {
   }
 
   void _onScroll() {
-    if (_isBottom) {
-      context.read<CharactersCubit>().fetchCharacters();
+    if (!_isBottom) return;
+
+    final now = DateTime.now();
+    if (_lastFetchTime != null &&
+        now.difference(_lastFetchTime!) < _fetchThrottle) {
+      return; // Ещё не прошло 500ms с последнего запроса
     }
+
+    _lastFetchTime = now;
+    context.read<CharactersCubit>().fetchCharacters();
   }
 
   bool get _isBottom {
