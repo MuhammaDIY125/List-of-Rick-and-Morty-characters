@@ -1,8 +1,11 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+
+import '/core/network/exceptions.dart';
 import '/features/characters/domain/models/character.dart';
 import '/features/characters/domain/repositories/character_repository.dart';
-
 part 'characters_state.dart';
 
 class CharactersCubit extends Cubit<CharactersState> {
@@ -51,27 +54,60 @@ class CharactersCubit extends Cubit<CharactersState> {
 
       // Фоновое обновление из сети для реализации offline-first
       _backgroundRefresh(state.currentPage - 1);
+    } on ConnectionException {
+      _handleError('No internet connection', isPageOne);
+    } on TimeoutException {
+      _handleError('Request timeout. Please try again', isPageOne);
+    } on ServerException {
+      _handleError('Server error. Please try again later', isPageOne);
+    } on ClientException catch (e) {
+      _handleError(e.message, isPageOne);
+    } on ParseException {
+      _handleError('Failed to load characters', isPageOne);
     } catch (e) {
-      if (state.characters.isEmpty) {
-        emit(
-          state.copyWith(
-            status: CharactersStatus.error,
-            errorMessage: e.toString(),
-          ),
-        );
-      } else {
-        // Сбрасываем статус в loaded, чтобы можно было попробовать еще раз при скролле
-        emit(state.copyWith(status: CharactersStatus.loaded));
-      }
+      developer.log(
+        'Unexpected error in fetchCharacters',
+        error: e,
+        name: 'CharactersCubit',
+      );
+      _handleError('Unknown error', isPageOne);
+    }
+  }
+
+  /// Обработка ошибок: если это первая страница, показываем ошибку; иначе сохраняем статус loaded
+  void _handleError(String errorMessage, bool isFirstPage) {
+    if (isFirstPage) {
+      emit(
+        state.copyWith(
+          status: CharactersStatus.error,
+          errorMessage: errorMessage,
+        ),
+      );
+    } else {
+      // Если это не первая страница, просто возвращаемся в loaded для повторной попытки
+      emit(state.copyWith(status: CharactersStatus.loaded));
     }
   }
 
   Future<void> _backgroundRefresh(int page) async {
     try {
       await _repository.getCharacters(page, forceRefresh: true);
-      // В данной реализации мы полагаемся на то, что данные обновлены в кэше.
-      // При следующем скролле или обновлении страницы данные будут актуальны.
-    } catch (_) {}
+      developer.log(
+        'Background refresh completed for page $page',
+        name: 'CharactersCubit',
+      );
+    } on NetworkException catch (e) {
+      developer.log(
+        'Background refresh failed: ${e.message}',
+        name: 'CharactersCubit',
+      );
+    } catch (e) {
+      developer.log(
+        'Background refresh error',
+        error: e,
+        name: 'CharactersCubit',
+      );
+    }
   }
 
   void retry() {
