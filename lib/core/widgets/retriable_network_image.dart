@@ -3,14 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class RetriableNetworkImage extends StatefulWidget {
-  const RetriableNetworkImage({
-    required this.imageUrl,
-    super.key,
-    this.fit = BoxFit.cover,
-  });
+  const RetriableNetworkImage({required this.imageUrl, super.key});
 
   final String imageUrl;
-  final BoxFit fit;
 
   @override
   State<RetriableNetworkImage> createState() => _RetriableNetworkImageState();
@@ -28,7 +23,7 @@ class _RetriableNetworkImageState extends State<RetriableNetworkImage> {
     return Image.network(
       widget.imageUrl,
       key: ValueKey(_attempt),
-      fit: widget.fit,
+      fit: BoxFit.cover,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return ColoredBox(color: placeholderColor);
