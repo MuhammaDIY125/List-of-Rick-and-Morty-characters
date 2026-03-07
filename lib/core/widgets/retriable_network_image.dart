@@ -22,17 +22,20 @@ class _RetriableNetworkImageState extends State<RetriableNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
+    final placeholderColor =
+        CardTheme.of(context).color ?? Theme.of(context).cardColor;
+
     return Image.network(
       widget.imageUrl,
       key: ValueKey(_attempt),
       fit: widget.fit,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return Container(color: Colors.white);
+        return ColoredBox(color: placeholderColor);
       },
       errorBuilder: (context, error, stackTrace) {
         _scheduleRetry();
-        return Container(color: Colors.white);
+        return ColoredBox(color: placeholderColor);
       },
     );
   }
