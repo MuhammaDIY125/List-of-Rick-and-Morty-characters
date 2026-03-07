@@ -49,8 +49,28 @@ class CharacterDetailsPage extends StatelessWidget {
                       child: Container(color: Colors.white),
                     );
                   },
-                  errorBuilder: (ctx, err, stack) =>
-                      const Icon(Icons.person, size: 100),
+                  errorBuilder: (ctx, err, stack) => Container(
+                    color: Colors.grey[300],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.broken_image,
+                          size: 100,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load image',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

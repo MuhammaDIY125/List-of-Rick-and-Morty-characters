@@ -44,8 +44,28 @@ class CharacterCard extends StatelessWidget {
                           child: Container(color: Colors.white),
                         );
                       },
-                      errorBuilder: (ctx, err, stack) =>
-                          const Icon(Icons.person, size: 48),
+                      errorBuilder: (ctx, err, stack) => Container(
+                        color: Colors.grey[300],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'No image',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   // Кнопка избранного в правом верхнем углу
