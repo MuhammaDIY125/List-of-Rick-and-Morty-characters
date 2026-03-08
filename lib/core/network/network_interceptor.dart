@@ -18,43 +18,50 @@ class NetworkInterceptor extends Interceptor {
 
   /// Преобразует DioException в типизированное NetworkException
   NetworkException _mapDioException(DioException error) {
-    switch (error.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.sendTimeout:
-        return TimeoutException();
+    final type = error.type;
 
-      case DioExceptionType.connectionError:
-        if (error.message?.contains('SocketException') ?? false) {
-          return ConnectionException();
-        }
-        return ConnectionException(
-          message: error.message ?? 'Connection error',
-        );
-
-      case DioExceptionType.badResponse:
-        final statusCode = error.response?.statusCode ?? 0;
-        if (statusCode >= 500) {
-          return ServerException(statusCode: statusCode);
-        } else if (statusCode >= 400) {
-          final message = _getClientErrorMessage(statusCode);
-          return ClientException(message: message, statusCode: statusCode);
-        }
-        return UnknownException();
-
-      case DioExceptionType.unknown:
-        if (error.error is FormatException ||
-            (error.message?.contains('json') ?? false)) {
-          return ParseException();
-        }
-        return UnknownException(message: error.message ?? 'Unknown error');
-
-      case DioExceptionType.badCertificate:
-        return UnknownException(message: 'Bad certificate');
-
-      case DioExceptionType.cancel:
-        return UnknownException(message: 'Request cancelled');
+    if (type == DioExceptionType.connectionTimeout ||
+        type == DioExceptionType.receiveTimeout ||
+        type == DioExceptionType.sendTimeout) {
+      return TimeoutException();
     }
+
+    if (type == DioExceptionType.connectionError) {
+      if (error.message?.contains('SocketException') ?? false) {
+        return ConnectionException();
+      }
+      return ConnectionException(message: error.message ?? 'Connection error');
+    }
+
+    if (type == DioExceptionType.badResponse) {
+      final statusCode = error.response?.statusCode ?? 0;
+      if (statusCode >= 500) {
+        return ServerException(statusCode: statusCode);
+      }
+      if (statusCode >= 400) {
+        final message = _getClientErrorMessage(statusCode);
+        return ClientException(message: message, statusCode: statusCode);
+      }
+      return UnknownException();
+    }
+
+    if (type == DioExceptionType.unknown) {
+      if (error.error is FormatException ||
+          (error.message?.contains('json') ?? false)) {
+        return ParseException();
+      }
+      return UnknownException(message: error.message ?? 'Unknown error');
+    }
+
+    if (type == DioExceptionType.badCertificate) {
+      return CertificateException();
+    }
+
+    if (type == DioExceptionType.cancel) {
+      return UnknownException(message: 'Request cancelled');
+    }
+
+    return UnknownException(message: error.message ?? 'Unknown error');
   }
 
   /// Описание ошибки клиента по статус-коду

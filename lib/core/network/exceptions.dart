@@ -43,6 +43,13 @@ class ParseException extends NetworkException {
   ParseException({String message = 'Failed to parse data'}) : super(message);
 }
 
+/// Ошибка TLS/SSL сертификата
+class CertificateException extends NetworkException {
+  CertificateException({
+    String message = 'Secure connection failed. Certificate is not trusted',
+  }) : super(message);
+}
+
 /// Неизвестная ошибка
 class UnknownException extends NetworkException {
   UnknownException({String message = 'Unknown error occurred'})
