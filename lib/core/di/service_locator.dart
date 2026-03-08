@@ -9,6 +9,7 @@ import '/core/network/dio_factory.dart';
 import '/core/theme/theme_cubit.dart';
 import '/features/characters/data/datasources/character_local_datasource.dart';
 import '/features/characters/data/datasources/character_remote_datasource.dart';
+import '/features/characters/data/models/character_cache_page_entity.dart';
 import '/features/characters/data/repositories/character_repository_impl.dart';
 import '/features/characters/domain/repositories/character_repository.dart';
 import '/features/characters/presentation/cubit/characters_cubit.dart';
@@ -27,6 +28,7 @@ Future<void> initServiceLocator() async {
   final dir = await getApplicationDocumentsDirectory();
   final isar = await Isar.open([
     FavoriteCharacterEntitySchema,
+    CharacterCachePageEntitySchema,
   ], directory: dir.path);
   sl.registerSingleton<Isar>(isar);
 
@@ -39,7 +41,7 @@ Future<void> initServiceLocator() async {
     () => CharacterRemoteDataSourceImpl(dioClient: sl()),
   );
   sl.registerLazySingleton<CharacterLocalDataSource>(
-    () => CharacterLocalDataSourceImpl(),
+    () => CharacterLocalDataSourceImpl(isar: sl()),
   );
   sl.registerLazySingleton<FavoritesLocalDataSource>(
     () => FavoritesLocalDataSourceImpl(isar: sl()),
