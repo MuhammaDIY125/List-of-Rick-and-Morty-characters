@@ -12,6 +12,26 @@ class CharacterDetailsPage extends StatelessWidget {
 
   final Character character;
 
+  void _showImagePreview(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        opaque: false,
+        transitionDuration: const Duration(milliseconds: 320),
+        reverseTransitionDuration: const Duration(milliseconds: 240),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _CharacterImagePreview(
+            imageUrl: character.image,
+            heroTag: 'character_${character.id}_image',
+            routeAnimation: animation,
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child;
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -46,26 +66,32 @@ class CharacterDetailsPage extends StatelessWidget {
                 const SizedBox(width: 12),
               ],
               flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Hero(
-                      tag: 'character_${character.id}_image',
-                      child: RetriableNetworkImage(imageUrl: character.image),
-                    ),
-                    // Затемнение только снизу для читаемости текста
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: [0.6, 1.0],
-                          colors: [Colors.transparent, Colors.black87],
+                background: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _showImagePreview(context),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Hero(
+                        tag: 'character_${character.id}_image',
+                        createRectTween: (begin, end) =>
+                            MaterialRectCenterArcTween(begin: begin, end: end),
+                        child: RetriableNetworkImage(imageUrl: character.image),
+                      ),
+                      // Затемнение только снизу для читаемости текста
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0.6, 1.0],
+                            colors: [Colors.transparent, Colors.black87],
+                          ),
                         ),
                       ),
-                    ),
-                    _HeaderTitleOverlay(character: character),
-                  ],
+                      _HeaderTitleOverlay(character: character),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -116,6 +142,92 @@ class CharacterDetailsPage extends StatelessWidget {
                     ],
                   ),
                 ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CharacterImagePreview extends StatelessWidget {
+  const _CharacterImagePreview({
+    required this.imageUrl,
+    required this.heroTag,
+    required this.routeAnimation,
+  });
+
+  final String imageUrl;
+  final String heroTag;
+  final Animation<double> routeAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    final curvedAnimation = CurvedAnimation(
+      parent: routeAnimation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
+    return Material(
+      type: MaterialType.transparency,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: curvedAnimation,
+                builder: (context, child) {
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(
+                        alpha: 0.78 * curvedAnimation.value,
+                      ),
+                    ),
+                    child: child,
+                  );
+                },
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const SizedBox.expand(),
+                ),
+              ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Hero(
+                    tag: heroTag,
+                    createRectTween: (begin, end) =>
+                        MaterialRectCenterArcTween(begin: begin, end: end),
+                    child: InteractiveViewer(
+                      minScale: 1,
+                      maxScale: 4,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.broken_image_outlined,
+                              size: 42,
+                              color: Colors.white,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
