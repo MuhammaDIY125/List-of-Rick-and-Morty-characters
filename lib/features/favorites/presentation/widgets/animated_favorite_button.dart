@@ -22,7 +22,7 @@ class AnimatedFavoriteButton extends StatelessWidget {
           color: Colors.black.withValues(alpha: showBackground ? 0.15 : 0),
           shape: BoxShape.circle,
           border: showBackground
-              ? Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1)
+              ? Border.all(color: Colors.white.withValues(alpha: 0.2))
               : null,
         ),
         child: AnimatedSwitcher(
