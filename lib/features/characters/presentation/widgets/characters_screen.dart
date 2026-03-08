@@ -16,6 +16,7 @@ class CharactersScreen extends StatefulWidget {
 class _CharactersScreenState extends State<CharactersScreen> {
   final ScrollController _scrollController = ScrollController();
   DateTime? _lastFetchTime;
+  bool _isViewportPrefetchScheduled = false;
   static const Duration _fetchThrottle = Duration(milliseconds: 500);
 
   @override
@@ -52,6 +53,23 @@ class _CharactersScreenState extends State<CharactersScreen> {
     return currentScroll >= (maxScroll - 200);
   }
 
+  void _maybePrefetchForLargeViewport(CharactersState state) {
+    if (_isViewportPrefetchScheduled) return;
+    if (state.hasReachedMax || state.status != CharactersStatus.loaded) return;
+
+    _isViewportPrefetchScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _isViewportPrefetchScheduled = false;
+      if (!mounted || !_scrollController.hasClients) return;
+
+      // If the grid is still not scrollable, fetch next page automatically.
+      final isScrollable = _scrollController.position.maxScrollExtent > 0;
+      if (!isScrollable) {
+        context.read<CharactersCubit>().fetchCharacters();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -68,6 +86,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
         ),
         child: BlocBuilder<CharactersCubit, CharactersState>(
           builder: (context, state) {
+            _maybePrefetchForLargeViewport(state);
+
             if (state.status == CharactersStatus.initial ||
                 (state.status == CharactersStatus.loading &&
                     state.characters.isEmpty)) {
