@@ -2,9 +2,20 @@
 
 Flutter-приложение для просмотра персонажей Rick and Morty с пагинацией, деталями, избранным и оффлайн-кэшированием страниц.
 
-## Demo
+### iPhone
+<table> <tr>
+<td><img src="assets/readme/iPhone_1.gif" width="200"/></td>
+<td><img src="assets/readme/iPhone_2.gif" width="200"/></td> 
+<td><img src="assets/readme/iPhone_3.gif" width="200"/></td> 
+<td><img src="assets/readme/iPhone_4.gif" width="200"/></td> 
+<td><img src="assets/readme/iPhone_5.gif" width="200"/></td>
+</tr> </table>
 
-![Demo GIF](assets/demo.gif)
+### iPad
+<table> <tr>
+<td><img src="assets/readme/iPad_1.gif" width="500"/></td>
+<td><img src="assets/readme/iPad_2.gif" width="500"/></td>
+</tr> </table>
 
 ## Функциональность
 
