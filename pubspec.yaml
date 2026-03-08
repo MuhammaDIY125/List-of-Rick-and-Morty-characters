@@ -26,6 +26,7 @@ dependencies:
 
   # Dependency injection
   get_it: ^9.2.1
+  shared_preferences: ^2.5.3
 
   # JSON Serialization
   json_annotation: ^4.9.0

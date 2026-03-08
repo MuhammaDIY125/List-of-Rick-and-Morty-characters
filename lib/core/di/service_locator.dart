@@ -3,6 +3,7 @@ import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '/core/network/dio_client.dart';
+import '../storage/preferences_service.dart';
 import '/features/characters/data/datasources/character_local_datasource.dart';
 import '/features/characters/data/datasources/character_remote_datasource.dart';
 import '/features/characters/data/repositories/character_repository_impl.dart';
@@ -18,6 +19,8 @@ import '/core/theme/theme_cubit.dart';
 final sl = GetIt.instance;
 
 Future<void> initServiceLocator() async {
+  await Preferences.instance.init();
+
   // Database
   final dir = await getApplicationDocumentsDirectory();
   final isar = await Isar.open([
@@ -51,5 +54,5 @@ Future<void> initServiceLocator() async {
   // Cubits
   sl.registerFactory(() => CharactersCubit(repository: sl()));
   sl.registerFactory(() => FavoritesCubit(repository: sl()));
-  sl.registerLazySingleton(() => ThemeCubit());
+  sl.registerLazySingleton(() => ThemeCubit(Preferences.instance));
 }
