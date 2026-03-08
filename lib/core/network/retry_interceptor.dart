@@ -10,12 +10,18 @@ class RetryInterceptor extends Interceptor {
 
   static const int _maxRetries = 3;
   static const Duration _initialDelay = Duration(milliseconds: 1000);
+  static const String _retryCountKey = 'retry_count';
+  static const String _skipRetryKey = 'skip_retry_interceptor';
 
   @override
   Future<void> onError(
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
+    if (_shouldSkipRetry(err.requestOptions)) {
+      return handler.next(err);
+    }
+
     final statusCode = err.response?.statusCode;
 
     // Обработка только 429 (Too Many Requests) ошибок
@@ -23,53 +29,70 @@ class RetryInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    // Получаем текущее количество попыток (0 для первой)
-    final previousAttempt = _getRetryCount(err.requestOptions);
+    // Получаем текущее количество уже выполненных повторов (0 для первой ошибки)
+    int currentAttempt = _getRetryCount(err.requestOptions);
+    DioException lastError = err;
 
-    if (previousAttempt >= _maxRetries) {
+    if (currentAttempt >= _maxRetries) {
       developer.log(
-        'Max retries ($previousAttempt) exceeded for ${err.requestOptions.path}',
+        'Max retries ($currentAttempt) exceeded for ${err.requestOptions.path}',
         name: 'RetryInterceptor',
       );
       return handler.next(err);
     }
 
-    // Парсим Retry-After header или используем exponential backoff
-    final Duration delay = _calculateDelay(previousAttempt, err.response);
+    while (currentAttempt < _maxRetries) {
+      // Парсим Retry-After header или используем exponential backoff
+      final delay = _calculateDelay(currentAttempt, lastError.response);
+
+      developer.log(
+        'Retry attempt ${currentAttempt + 1}/$_maxRetries for ${err.requestOptions.path} '
+        'after ${delay.inMilliseconds}ms',
+        name: 'RetryInterceptor',
+      );
+
+      // Ждём перед повтором
+      await Future.delayed(delay);
+
+      // Помечаем запрос как внутренний retry, чтобы interceptor не заходил в себя повторно
+      final options = lastError.requestOptions.copyWith(
+        extra: {
+          ...lastError.requestOptions.extra,
+          _retryCountKey: currentAttempt + 1,
+          _skipRetryKey: true,
+        },
+      );
+
+      try {
+        final response = await _dio.fetch(options);
+        return handler.resolve(response);
+      } on DioException catch (e) {
+        lastError = e;
+        if (e.response?.statusCode != 429) {
+          return handler.next(e);
+        }
+        currentAttempt++;
+      }
+    }
 
     developer.log(
-      'Retry attempt ${previousAttempt + 1}/$_maxRetries for ${err.requestOptions.path} '
-      'after ${delay.inMilliseconds}ms',
+      'Max retries ($_maxRetries) exceeded for ${err.requestOptions.path}',
       name: 'RetryInterceptor',
     );
-
-    // Ждём перед повтором
-    await Future.delayed(delay);
-
-    // Увеличиваем счётчик попыток и повторяем запрос
-    final options = err.requestOptions.copyWith(
-      extra: {
-        ...err.requestOptions.extra,
-        'retry_count': previousAttempt + 1,
-      },
-    );
-
-    try {
-      final response = await _dio.fetch(options);
-      return handler.resolve(response);
-    } on DioException catch (e) {
-      // Если повтор тоже не удался, проходим через обработчик ошибок
-      return handler.next(e);
-    }
+    return handler.next(lastError);
   }
 
   /// Получает количество уже выполненных попыток
   int _getRetryCount(RequestOptions options) {
     final extra = options.extra;
-    if (extra.containsKey('retry_count')) {
-      return extra['retry_count'] as int;
+    if (extra.containsKey(_retryCountKey)) {
+      return extra[_retryCountKey] as int;
     }
     return 0;
+  }
+
+  bool _shouldSkipRetry(RequestOptions options) {
+    return options.extra[_skipRetryKey] == true;
   }
 
   /// Вычисляет задержку перед повтором на основе Retry-After или exponential backoff
