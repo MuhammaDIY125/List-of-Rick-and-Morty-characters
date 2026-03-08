@@ -1,8 +1,10 @@
 import 'package:get_it/get_it.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
 
 import '/core/network/dio_client.dart';
+import '/core/network/api_constants.dart';
 import '../storage/preferences_service.dart';
 import '/features/characters/data/datasources/character_local_datasource.dart';
 import '/features/characters/data/datasources/character_remote_datasource.dart';
@@ -29,7 +31,17 @@ Future<void> initServiceLocator() async {
   sl.registerSingleton<Isar>(isar);
 
   // Network
-  sl.registerLazySingleton<DioClient>(() => DioClient());
+  sl.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: ApiConstants.connectTimeout,
+        receiveTimeout: ApiConstants.receiveTimeout,
+        validateStatus: (status) => status != null && status < 400,
+      ),
+    ),
+  );
+  sl.registerLazySingleton<DioClient>(() => DioClient(dio: sl()));
 
   // Datasources
   sl.registerLazySingleton<CharacterRemoteDataSource>(
