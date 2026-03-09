@@ -1,7 +1,7 @@
 name: list_of_rick_and_morty_characters
 description: "List of Rick and Morty characters"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: ^3.10.4
